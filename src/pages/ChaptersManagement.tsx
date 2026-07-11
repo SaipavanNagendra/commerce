@@ -84,173 +84,173 @@ export function ChaptersManagement() {
         <AdminNav />
         {/* Header */}
         <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Chapters Management</h1>
-          <p className="mt-1 text-slate-600">Organize chapters within subjects</p>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Chapters Management</h1>
+            <p className="mt-1 text-slate-600">Organize chapters within subjects</p>
+          </div>
+          {!isCreating && (
+            <Button onClick={() => setIsCreating(true)} className="w-auto">
+              + Add Chapter
+            </Button>
+          )}
         </div>
-        {!isCreating && (
-          <Button onClick={() => setIsCreating(true)} className="w-auto">
-            + Add Chapter
-          </Button>
-        )}
-      </div>
 
-      {/* Errors */}
-      {error && <ErrorAlert message={(error as any).message || 'Failed to load chapters'} />}
-      {formError && <ErrorAlert message={formError} />}
+        {/* Errors */}
+        {error && <ErrorAlert message={(error as any).message || 'Failed to load chapters'} />}
+        {formError && <ErrorAlert message={formError} />}
 
-      {/* Filters */}
-      <div className="flex gap-4 flex-wrap">
-        <select
-          value={filterSubject}
-          onChange={(e) => setFilterSubject(e.target.value)}
-          className="rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-teal-500"
-        >
-          <option value="">All Subjects</option>
-          {subjects?.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
+        {/* Filters */}
+        <div className="flex gap-4 flex-wrap">
+          <select
+            value={filterSubject}
+            onChange={(e) => setFilterSubject(e.target.value)}
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-teal-500"
+          >
+            <option value="">All Subjects</option>
+            {subjects?.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
 
-        <select
-          value={filterClass}
-          onChange={(e) => setFilterClass(e.target.value as ClassLevel | '')}
-          className="rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-teal-500"
-        >
-          <option value="">All Classes</option>
-          <option value="CLASS_11">Class 11</option>
-          <option value="CLASS_12">Class 12</option>
-        </select>
-      </div>
+          <select
+            value={filterClass}
+            onChange={(e) => setFilterClass(e.target.value as ClassLevel | '')}
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-teal-500"
+          >
+            <option value="">All Classes</option>
+            <option value="CLASS_11">Class 11</option>
+            <option value="CLASS_12">Class 12</option>
+          </select>
+        </div>
 
-      {/* Create Form */}
-      {isCreating && (
-        <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900 mb-6">Create New Chapter</h2>
-          <form className="space-y-4" onSubmit={handleCreate}>
-            <div className="grid grid-cols-2 gap-4">
+        {/* Create Form */}
+        {isCreating && (
+          <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+            <h2 className="text-xl font-bold text-slate-900 mb-6">Create New Chapter</h2>
+            <form className="space-y-4" onSubmit={handleCreate}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Subject *
+                  </label>
+                  <select
+                    value={formData.subjectId}
+                    onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
+                    className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-teal-500"
+                    required
+                  >
+                    <option value="">Select Subject</option>
+                    {subjects?.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Class Level *
+                  </label>
+                  <select
+                    value={formData.classLevel}
+                    onChange={(e) => setFormData({ ...formData, classLevel: e.target.value as ClassLevel })}
+                    className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-teal-500"
+                  >
+                    <option value="CLASS_11">Class 11</option>
+                    <option value="CLASS_12">Class 12</option>
+                  </select>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Subject *
+                  Chapter Title *
                 </label>
-                <select
-                  value={formData.subjectId}
-                  onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-teal-500"
+                  placeholder="e.g., Introduction to Accounting"
                   required
-                >
-                  <option value="">Select Subject</option>
-                  {subjects?.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Class Level *
+                  Order (Display Sequence) *
                 </label>
-                <select
-                  value={formData.classLevel}
-                  onChange={(e) => setFormData({ ...formData, classLevel: e.target.value as ClassLevel })}
+                <input
+                  type="number"
+                  value={formData.order}
+                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 1 })}
                   className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-teal-500"
-                >
-                  <option value="CLASS_11">Class 11</option>
-                  <option value="CLASS_12">Class 12</option>
-                </select>
+                  min="1"
+                  required
+                />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Chapter Title *
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-teal-500"
-                placeholder="e.g., Introduction to Accounting"
-                required
-              />
-            </div>
+              <div className="flex gap-3 pt-4">
+                <Button type="submit" isLoading={createMutation.isPending}>
+                  Create Chapter
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setIsCreating(false)}
+                  disabled={createMutation.isPending}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </div>
+        )}
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Order (Display Sequence) *
-              </label>
-              <input
-                type="number"
-                value={formData.order}
-                onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 1 })}
-                className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-teal-500"
-                min="1"
-                required
-              />
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button type="submit" isLoading={createMutation.isPending}>
-                Create Chapter
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setIsCreating(false)}
-                disabled={createMutation.isPending}
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Chapters Table */}
-      {filteredChapters && filteredChapters.length > 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Title</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Subject</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Class</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Order</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Slug</th>
-                <th className="px-6 py-3 text-right text-sm font-semibold text-slate-900">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredChapters.map((chapter) => (
-                <tr key={chapter.id} className="border-b border-slate-200 hover:bg-slate-50">
-                  <td className="px-6 py-4 text-sm text-slate-900 font-medium">{chapter.title}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{chapter.subject?.name}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{chapter.classLevel}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{chapter.order}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600 truncate max-w-xs">{chapter.slug}</td>
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => handleDelete(chapter.id)}
-                      disabled={deleteMutation.isPending}
-                      className="text-red-600 hover:text-red-700 text-sm font-medium disabled:opacity-50"
-                    >
-                      Delete
-                    </button>
-                  </td>
+        {/* Chapters Table */}
+        {filteredChapters && filteredChapters.length > 0 ? (
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden overflow-x-auto">
+            <table className="w-full min-w-[640px]">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Title</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Subject</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Class</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Order</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Slug</th>
+                  <th className="px-6 py-3 text-right text-sm font-semibold text-slate-900">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="rounded-lg border-2 border-dashed border-slate-200 py-12 text-center">
-          <p className="text-slate-500">No chapters found. Create one to get started.</p>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {filteredChapters.map((chapter) => (
+                  <tr key={chapter.id} className="border-b border-slate-200 hover:bg-slate-50">
+                    <td className="px-6 py-4 text-sm text-slate-900 font-medium">{chapter.title}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{chapter.subject?.name}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{chapter.classLevel}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{chapter.order}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 truncate max-w-xs">{chapter.slug}</td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleDelete(chapter.id)}
+                        disabled={deleteMutation.isPending}
+                        className="text-red-600 hover:text-red-700 text-sm font-medium disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="rounded-lg border-2 border-dashed border-slate-200 py-12 text-center">
+            <p className="text-slate-500">No chapters found. Create one to get started.</p>
+          </div>
+        )}
       </div>
     </div>
   );
