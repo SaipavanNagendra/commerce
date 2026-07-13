@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuthContext } from '../../context/AuthContext';
 import { useLogout } from '../../hooks/useAuth';
+import { useNotifications, useMarkNotificationRead } from '../../hooks/useNotifications';
 import { initials, resolveAvatarUrl } from '../../lib/format';
 
 function Logo() {
@@ -30,24 +31,18 @@ export function SiteHeader() {
   const avatarUrl = resolveAvatarUrl(user?.profile.avatarPath);
   const logoutMutation = useLogout();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Works on hover (desktop) AND on tap (mobile/touch, where mouseenter
-  // never fires). A short delay on "leave" stops it from vanishing the
-  // instant the mouse crosses the small gap between the avatar and the
-  // popup below it; tapping the avatar just toggles it directly.
+  // Hover-triggered, not click/tap. A short delay on leave stops it from
+  // vanishing the instant the mouse crosses the small gap between the
+  // avatar and the popup below it.
   function openMenu() {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setMenuOpen(true);
   }
   function scheduleClose() {
     closeTimer.current = setTimeout(() => setMenuOpen(false), 150);
-  }
-  function toggleMenu() {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    setMenuOpen((open) => !open);
   }
 
   async function handleLogout() {
@@ -63,7 +58,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
+      <div className="mx-auto flex max-w-[1600px] items-center justify-between px-6 py-3.5">
         <div className="flex items-center gap-10">
           <Logo />
           <nav className="hidden items-center gap-7 sm:flex">
@@ -85,6 +80,8 @@ export function SiteHeader() {
               Dashboard
             </Link>
 
+            <NotificationBell />
+
             <div
               className="relative"
               ref={menuRef}
@@ -93,7 +90,6 @@ export function SiteHeader() {
             >
               <button
                 type="button"
-                onClick={toggleMenu}
                 className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-blue-100 text-sm font-semibold text-blue-700"
                 title="Account"
               >
@@ -162,45 +158,70 @@ export function SiteHeader() {
             </Link>
           </div>
         )}
-
-        {/* Mobile hamburger — shows the Subjects/Tests/Olympiads nav that's hidden above on small screens */}
-        <button
-          type="button"
-          onClick={() => setMobileNavOpen((open) => !open)}
-          className="ml-3 flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 sm:hidden"
-          aria-label="Toggle navigation menu"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-            <path d="M4 7h16M4 12h16M4 17h16" />
-          </svg>
-        </button>
       </div>
-
-      {mobileNavOpen && (
-        <nav className="flex flex-col gap-1 border-t border-slate-200 px-6 py-3 sm:hidden">
-          <NavLink
-            to="/subjects"
-            onClick={() => setMobileNavOpen(false)}
-            className={navLinkClass}
-          >
-            Subjects
-          </NavLink>
-          <NavLink
-            to="/tests"
-            onClick={() => setMobileNavOpen(false)}
-            className={navLinkClass}
-          >
-            Tests
-          </NavLink>
-          <NavLink
-            to="/olympiads"
-            onClick={() => setMobileNavOpen(false)}
-            className={navLinkClass}
-          >
-            Olympiads
-          </NavLink>
-        </nav>
-      )}
     </header>
+  );
+}
+function NotificationBell() {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { data } = useNotifications({ take: 8 });
+  const markRead = useMarkNotificationRead();
+
+  const unreadCount = (data?.notifications ?? []).filter((n) => !n.isRead).length;
+
+  function openMenu() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpen(true);
+  }
+  function scheduleClose() {
+    closeTimer.current = setTimeout(() => setOpen(false), 150);
+  }
+
+  return (
+    <div className="relative" onMouseEnter={openMenu} onMouseLeave={scheduleClose}>
+      <Link
+        to="/notifications"
+        className="relative flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100"
+        title="Notifications"
+      >
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6" />
+          <path d="M10 21a2 2 0 0 0 4 0" />
+        </svg>
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </Link>
+
+      {open && (
+        <div className="absolute right-0 top-full z-30 mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
+            <p className="text-sm font-bold text-slate-900">Notifications</p>
+            <Link to="/notifications" className="text-xs font-semibold text-blue-600 hover:text-blue-700">
+              View all
+            </Link>
+          </div>
+          <div className="max-h-80 overflow-y-auto">
+            {(data?.notifications ?? []).length === 0 && (
+              <p className="px-4 py-6 text-center text-sm text-slate-500">No notifications yet.</p>
+            )}
+            {(data?.notifications ?? []).map((n) => (
+              <button
+                key={n.id}
+                onClick={() => !n.isRead && markRead.mutate(n.id)}
+                className={`block w-full border-b border-slate-50 px-4 py-3 text-left last:border-b-0 hover:bg-slate-50 ${!n.isRead ? 'bg-blue-50/40' : ''
+                  }`}
+              >
+                <p className="text-sm font-semibold text-slate-900">{n.title}</p>
+                <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{n.body}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
