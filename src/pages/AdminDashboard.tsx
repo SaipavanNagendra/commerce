@@ -80,14 +80,6 @@ export function AdminDashboard() {
     },
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-24">
-        <p className="text-slate-600">Loading admin dashboard...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -110,7 +102,9 @@ export function AdminDashboard() {
             >
               <div className="text-4xl mb-2">{stat.icon}</div>
               <p className="text-sm font-medium opacity-75">{stat.label}</p>
-              <p className="text-3xl font-bold mt-1">{stat.count}</p>
+              <p className="text-3xl font-bold mt-1">
+                {isLoading ? <span className="inline-block animate-pulse">...</span> : stat.count}
+              </p>
             </button>
           ))}
         </div>
